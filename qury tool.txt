@@ -1,0 +1,72 @@
+SELECT profile.email
+FROM accounts
+WHERE identities.email is not null  and isActive = 'true'
+
+what is the total number of active accounts
+how many active users are subscribed to Direct Mail channels
+how many of them provided the address manually and how many checked "use the organization address" checkbox.
+SELECT count(*) FROM accounts WHERE checkbox CONTAINS "use the organization address"
+
+
+query components
+1.for evaluate
+function process(record, ctx, logger, next) {
+    logger.info("record",record);
+    record._query = "SELECT UID from accounts where profile.firstName !=\'" + 'a' + "\' '"; 
+    return record;
+}
+
+2.function process(record, ctx, logger, next) {
+    
+    if(record.profile.lastName === 'b'){
+         return record;
+    }
+
+   
+} 
+
+record._query = "SELECT UID, profile.email from accounts where UID=\'a1eb32ffedd548fb9edeac3fd2201578\'" ;
+
+record._query = "SELECT UID, profile.email from accounts where UID=\'069c1120328e4a23be4a9d92dde56e01\'" ;
+=============================================================================
+
+CI/CD pipeline
+ci - continuous integration like write the code and commit continuously
+cd - continuous deployment like deploys the code directly to the production server 
+
+
+============================================================================
+data - Custom data. Any data that you want to store regarding the user that isn't part of the profile object
+============================================================================
+email templates 
+
+*No direct changes in screen set.
+*No css change
+*we can change only in js file in repository
+in repo we have like cindi-js file where all the js code is present
+*email template generator for email templates - there we have all the templates
+ for the href image we have the link (no need to make changes there we get it automatically)
+ like for dev source or test source
+*All the images will be present in AWS we can copy the image link.
+* for consent we have consent statement file.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    *And we connect the console to the repository through the websdk
+*we have the link there in hlink.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

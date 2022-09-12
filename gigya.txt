@@ -1,0 +1,300 @@
+Gigya document
+
+Partner id - The partner ID is your official account number. You'll need this when communicating your account manager or your implementation consultant.
+Secret key - The secret key is shared between your sites and your applications and the console.
+             Anyone who has access to this key may perform actions on your account
+===========================================================
+
+CONSOLE ADMINISTRATION: console overview
+===========================================================
+
+Managing admins and user:
+*Inviting administrator, to which group to be assigned and priviliges provided
+*Adding existing one by the help of user key
+
+===========================================================
+Managing applications:
+*Create and Manage Applications to Sign Requests to SAP Customer Data Cloud or CDC
+*Application keys - are credentials that REST applications use to access CDC’s API
+*They are functionally the same as user keys, but with a few differences in that: 
+ they are not associated with an account that can log into the admin console, 
+ their actions are not recorded by the audit logs, and
+ they have higher rate limits than standard site and user keys
+
+API requests to CDC should be made securely using an authentication mechanism.
+1.Bearer token - signing request using HTTP bearer token
+  The bearer token is sent as a JWT(Jason web token). It is constructed using a unique RSA key provided in the CDC console
+2.Use application key and secret key
+
+=============================================================
+Permission groups
+*Creating permission groups and providing previliges,data feild scope,add members
+
+=============================================================
+
+Identity query tools 
+
+-it is used to retrive the users profile data or metadata
+*accounts.search and ids.search we can retrive the user data with api also
+*data object feild is the custom feild like newsletter,subscribe
+=============================================================
+Postman api calls
+accounts.search sample queries - accounts.search examples
+
+*The query string clauses must be ordered in the following way*:
+1.Select clause
+2.From clause
+3.Where clause
+4.Filter clause
+5.Group By clause
+6.Order By clause
+7.Start clause Or/And Limit clause
+ *Queries ordered differently will produce an error.
+ 
+cases
+LIMIT 5 START 100 means 5 records after 100
+count(*), as ,sum(), min(), max(), avg(), sum_of_squares(), 
+variance(), std() ,in() ,is null , is not null ,not ,regex ('<regex-pattern>')(regular expressions)
+
+limit - Using the "LIMIT" clause, you may specify the maximum number of returned result objects. 
+If not specified, the default is 300. The maximum number of results that will be returned is 10000;
+setting a limit higher than 10000 will have no affect on number of results.
+If the search is sent with openCursor = true, LIMIT will set the batch size. LIMIT must be the last item in the query.
+
+start - The "start" clause (not an SQL standard clause) may be used for paging.
+The clause specifies the start index from which to return result objects.
+The maximum start value accepted is 5000.
+
+Note: Use a POST request rather than GET if you are using a direct REST call.
+===================================================================
+POSTMAN
+CRUD operations
+GET-read, POST -create, PUT -update, DELETE -delete.
+
+For post request we need to add the content in jason in body(raw) 
+when we are creating response will be 201
+
+Environment we will have the keys and values there
+for POST request we need to add the content in the body and PUT aslo ,in jason format
+
+accounts.initregistration a reg token will be generated
+that can be used for full registration
+
+===================================================================
+LITE registration
+*It allows users to subscribe for a newslettrt/competition/vote without requiring registration first
+with only email no password required for first time 
+when password is provided then it becomes the fully registered one.
+*when lite registered we have the account in email account not in account
+when fully registererd we get it in accounts
+-----------------------------------------------------------------------
+Call accounts.initRegistration with the following parameters
+isLite: true
+callback: function that passes response data from this call to accounts.setAccountInfo
+--------------------------------------------------------------------------
+Call accounts.setAccountInfo with the following minimum parameters received from initRegistration.
+regToken
+profile: {email:"The user's email"} email should be provided this way only
+-------------------------------------------------------------------------
+Call accounts.getLiteToken with the user's email address to receive a token.
+Pass that token in the regToken param of accounts.register.along with email and password
+
+and then if we want to finaliize finalizeRegiatration as true.
+
+=========================================================================
+Screen-Sets
+we can create new screen set from scratch in HTML code 
+Or use the existing one but we should clone and use it if not under advanced customization 
+the previous one will be lost. 
+
+for the screens check in the documentation for the demo code 
+*it can be done by pasting the code in the htdocs of the apache server in localhost
+
+customer identity implementation methods
+
+--------------------------------------------------------------------------
+RAAS policies
+Registration as a services policies allow you as the Gigya console administrator to
+ define the site policies and settings for user registration and login.
+========================================================================
+WEBSDK:
+add the following code to your sites header template.
+<script type="text/javascript" lang="javascript" src="cdns.<Data_Center>/js/gigya.js?apikey=<A_Valid_API_Key_For_Your_Site>">
+</script>
+
+Subscribing to Events:
+function displayEventMessage(eventObj) {
+    alert(eventObj.context + ' ' + eventObj.eventName);
+}
+gigya.socialize.addEventHandlers({
+    onError: displayEventMessage,
+});
+gigya.accounts.addEventHandlers({
+    onError: displayEventMessage,
+});
+
+Calling the Method:
+gigya.<namespace>.<method_name>(params);
+// e.g., gigya.socialize.showShareBarUI(params)
+===================================================================
+social Login:
+we do have social login demo.
+client side means websdk , server side means rest api
+we do have different basic code and demo codes for the same in documentation.
+==================================================================
+DATA flows (identity sync),sftp(secure file transfer protocol)
+
+dataflows for exporting and importing user data
+*IdentitySync SAP Customer Data Cloud's solution for transferring data between platforms                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          *it's the go-to place for integrating your user data into third party systems
+*In addition, it's used for migrating users between two different CDC sites and for importing user data into CDC 
+*it's used for migrating users between two different CDC sites and for importing user data into CDC
+*A component is a preconfigured unit that is used to perform a specific data integration operation.
+*The components include readers, writers, transformers, deleters, and look-ups
+Each component is responsible for performing a single task,
+such as extracting accounts from SAP Customer Data Cloud based on specific parameters,
+changing field names, creating a CSV file, uploading a file to FTP and 
+writing data directly to a target platform or sending it to a generic API endpoint
+
+steps:
+1.check for accounts in identity access 
+2.if there are no accounts 
+3. then we should prepare a jason file with user
+4.The users must have a UID field which will identify them in the CDC database
+5. If they don't, we could add a step in identity sync that generates random UIDs
+6,Create a new data flow and select Gigya with SFTP. We're going to import full accounts from SFTP and press continue
+provide all the required information of the feilds there
+after providing the information hit save and close.
+We can run a test to see if our flow is defined correctly
+we can set a scheduler 
+in log level we can choose error log,info log, debug log.
+we can set the number of records to get default is 3 we can also provide the email to show up the success or failure.
+
+4 status of job run
+succeeded, completed with errors, failed and stopped
+and finally we can check that job id will be added in the custom feild in the profile data.
+
+Data flow 
+Dataflows are the SAP Customer Data Cloud robust ETL solution (Extract, Transform, Load) that offers an easy way to transfer data in bulk between platforms.
+*shared variables:You may create and manage variables, that can be shared in different dataflows within the same site, 
+ the same data center or across all partner sites
+we can create shared variables accordingly if not required we can delete it.
+*Shared variables are case sensitive.
+//Note that Dataflow jobs are scheduled in UTC time
+
+Value placeholders:
+apikey,now(VendorName_${now:yyyyMMddssSSS}.csv),unix(The timestamp of the time at which the record was processed, in seconds. Example: 1543243596),jobid
+
+
+DATASOURCE:
+datasource.read components extract data from a platform(max 2 gb)
+datasource.write components upload data to a target platform(max50gb if it exceeds then we can make changes in maxconcurrency)
+datasource.lookup components extract data from a platform based on a field from another data source.
+datasource.delete components delete information from the target platform (e.g., a user record).
+
+
+custom scripts(record.evaluate)
+*offers you the option of writing your own custom scripts to use in a dataflow
+Code	Behavior in GraalVM	Behavior in Nashorn
+undefined === null	'true'	'false'
+undefined !== null	'false'	'true'
+"Test script" can be used for finding logical errors in the code
+
+ Use this parameter only when the script produces a large number of records
+function process(record, ctx, logger, next, error) {next.accept(record, record);
+}
+
+error: sends a failed record to the error path (for example, for writing to a separate file). Example:
+function process(record, ctx, logger, next, error) {error.accept(record, record);
+}
+
+In the above syntax (record, record), the first 'record' is the new data, after manipulation. 
+The second 'record' is the original one, and is used in error paths.
+
+
+==============================================================================================
+Consent statements:
+
+*3Types of consent statements Terms of Service, Privacy Policies and Other Consent Statements
+*Consent statements are created and configured only on the parent site, and activated or de-activated for individual child sites
+*ID is the feild name created in the schema.
+*once the new consent is saved, the value of the ‘Versioning By’ field cannot be changed.
+The value of the ‘effective as of field’ will be written against the customer’s account data when they register.
+The re-consent cut-off value controls the document versioning process and supports both major and minor versioning
+*we can add a localized consent template
+You can also add Custom Data to the consent statement
+*Up to 50 key/value pairs can be created per consent statement
+Terms of service consent statements are always prepended with the word ‘terms’ and
+privacy policy consent statements are always prepended with ‘privacy’.
+*add a checkbox to the screen-set and map the checkbox to the isConsentGranted property of the consent schema field
+Under the meta data we can add the tags, useful when we can know on which screen the consent is granted on screens.
+
+*SAP Customer Consent is our offering for managing user privacy, preferences and consent in a way that is transparent to the user, 
+while helping you uphold rigorous standards so as to support your compliance with international privacy regulations
+*we can create the consent in consent statements by id and by providing the url
+*then we can map it in the ui builder by chekbox >map feild>label one
+* we need to create consent for registartion,registration completion,
+*If Screen sets cannot be used, we could use APIs to realize the consent logic.
+by api calls accounts.notifyLogin REST >accounts.setAccountInfo REST(This endpoint accepts the regToken returned from the accounts.notifyLogin)>
+ accounts.finalizeRegistration(use same regtoken)
+Naming convention
+roche_terms_of_service_{%countryCode%} _{%cNumber%} ex:terms.roche_terms_of_service_br_1   (Brazil)
+roche_terms_of_service_{%countryCode%} _{%portalName%}-SAML_{%cNumber%} ex:terms.roche_terms_of_service_ca_medically-saml_1
+
+url structure
+*{domain.com}/policies/{document type}/{countryCode}/{languageCode | localeCode}/fullFileName
+*the domains can be domain - e.g. public-resource.dev.digitalidentity.roche.com OR public-resource.test.digitalidentity.roche.com 
+OR public-resource.digitalidentity.roche.com
+ex:public-resource.digitalidentity.roche.com/policies/termsOfservice/GB/en/Roche Digital Identity - Terms of Service GB_en_0.1.pdf
+
+
+
+
+=============================================================================================
+
+
+
+UI builder - read evaluate
+
+screen-set:A Screen-Set is a set of user interaction screens that are connected logically
+*If your site is using a CNAME you can reset your site's screen-set cache by pressing the Reset Cache button
+=============================================================================================
+
+SAML 
+
+*Security assertion markup language(SAML) is an XML based,open std data format for exchanging authentication and autherization data between entities.
+*In simple terms, SAML is a std for federating login/logout to a third party. 
+
+Idp - this authenticates the user.
+sp -the entity which needs a user authenticated before they provide service to that user.
+Assertion - After authentication the idp provides user data to the SP by including assertions in the Response XML.
+x.509 certificate - SAML uses X.509 certificates for signatures and encryption.
+
+*In connect under identity we go to outbound federation> saml
+*Then under configure SAML identity providers to put the proxy page URL and error page URL
+*Then under the SAML Idp Metadata provide the required data in Metadata URL we get the sso link,slo link ,entity id and x509 certificate in XML format
+
+*Then in inbound federation we provide all the data for the SAML as service provider.
+
+*In order to complete an integration there are 4 pages which must be created
+1.login page 2.logout page 3.proxy page 4.error page
+all four of the HTML pages are created 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
